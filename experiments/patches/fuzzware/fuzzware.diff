@@ -1,0 +1,98 @@
+diff -Naur emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h emulator-modified/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h
+--- emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h	2025-05-04 22:20:38.063596715 +0800
++++ emulator-modified/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h	2025-05-04 22:49:02.187293587 +0800
+@@ -87,7 +87,7 @@
+ 
+ #elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+   #if defined __ARM_FP
+-    #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
++    // #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
+   #endif
+ 
+ #elif defined ( __GNUC__ )
+diff -Naur emulator/harness/fuzzware_harness/native/Makefile emulator-modified/harness/fuzzware_harness/native/Makefile
+--- emulator/harness/fuzzware_harness/native/Makefile	2025-05-04 22:20:38.062596707 +0800
++++ emulator-modified/harness/fuzzware_harness/native/Makefile	2025-05-04 22:39:09.364214258 +0800
+@@ -6,7 +6,8 @@
+ BIN_EXT = .so
+ 
+ CC = clang
+-CFLAGS += -fpic -Wall -Werror $(INC) -g -O3
++# CFLAGS += -fpic -Wall -Werror $(INC) -g -O3
++CFLAGS += -fpic -Wno-format $(INC) -g -O3
+ LDFLAGS += -shared -L$(LIBDIR) -lunicorn
+ 
+ .PHONY: all clean
+diff -Naur emulator/unicorn/fuzzware-unicorn/Makefile emulator-modified/unicorn/fuzzware-unicorn/Makefile
+--- emulator/unicorn/fuzzware-unicorn/Makefile	2025-05-04 22:21:39.895144130 +0800
++++ emulator-modified/unicorn/fuzzware-unicorn/Makefile	2025-05-04 22:51:24.246515678 +0800
+@@ -143,8 +143,10 @@
+ ifeq ($(UNICORN_DEBUG),yes)
+ CFLAGS += -g
+ else
+-CFLAGS += -O3 -g -DNDEBUG -march=native
+-UNICORN_CFLAGS += -O3 -g -DNDEBUG -march=native
++# CFLAGS += -O3 -g -DNDEBUG -march=native
++# UNICORN_CFLAGS += -O3 -g -DNDEBUG -march=native
++CFLAGS += -O3 -g -DNDEBUG # -march=armv8-a -mfloat-abi=soft
++UNICORN_CFLAGS += -O3 -g -DNDEBUG # -march=armv8-a -mfloat-abi=soft
+ UNICORN_QEMU_FLAGS += --disable-debug-info
+ endif
+ 
+diff -Naur emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c emulator-modified/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c
+--- emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c	2025-05-04 22:21:40.004145094 +0800
++++ emulator-modified/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c	2025-05-04 22:54:08.578930644 +0800
+@@ -999,7 +999,11 @@
+     TCGMemOp opc = lb->opc;
+     TCGMemOp size = opc & MO_SIZE;
+ 
+-    reloc_pc19(lb->label_ptr[0], s->code_ptr);
++    // reloc_pc19(lb->label_ptr[0], s->code_ptr);
++	const int type = (HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_WRITE) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ_AFTER)) ?
++	            R_AARCH64_JUMP26 : R_AARCH64_CONDBR19;
++	patch_reloc(lb->label_ptr[0], type, (intptr_t)s->code_ptr, 0);
++
+ 
+     tcg_out_mov(s, TCG_TYPE_I64, TCG_REG_X0, TCG_AREG0);
+     tcg_out_mov(s, TARGET_LONG_BITS == 64, TCG_REG_X1, lb->addrlo_reg);
+@@ -1020,7 +1024,10 @@
+     TCGMemOp opc = lb->opc;
+     TCGMemOp size = opc & MO_SIZE;
+ 
+-    reloc_pc19(lb->label_ptr[0], s->code_ptr);
++    // reloc_pc19(lb->label_ptr[0], s->code_ptr);
++	const int type = (HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_WRITE) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ_AFTER)) ?
++	            R_AARCH64_JUMP26 : R_AARCH64_CONDBR19;
++	patch_reloc(lb->label_ptr[0], type, (intptr_t)s->code_ptr, 0);
+ 
+     tcg_out_mov(s, TCG_TYPE_I64, TCG_REG_X0, TCG_AREG0);
+     tcg_out_mov(s, TARGET_LONG_BITS == 64, TCG_REG_X1, lb->addrlo_reg);
+@@ -1104,7 +1111,15 @@
+ 
+     /* If not equal, we jump to the slow path. */
+     *label_ptr = s->code_ptr;
+-    tcg_out_goto_cond_noaddr(s, TCG_COND_NE);
++    // tcg_out_goto_cond_noaddr(s, TCG_COND_NE);
++    /* Unicorn: fast path if hookmem is not enable */
++	if (!HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ) && !HOOK_EXISTS(s->uc, UC_HOOK_MEM_WRITE) && !HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ_AFTER)){
++	    tcg_out_goto_cond_noaddr(s, TCG_COND_NE);
++	} else {
++	  /* If not equal, we jump to the slow path. */
++	    tcg_out_goto_noaddr(s);
++	}
++
+ }
+ 
+ #endif /* CONFIG_SOFTMMU */
+diff -Naur emulator/unicorn/fuzzware-unicorn/samples/Makefile emulator-modified/unicorn/fuzzware-unicorn/samples/Makefile
+--- emulator/unicorn/fuzzware-unicorn/samples/Makefile	2025-05-04 22:21:40.013145174 +0800
++++ emulator-modified/unicorn/fuzzware-unicorn/samples/Makefile	2025-05-04 22:54:51.240298151 +0800
+@@ -23,7 +23,7 @@
+ LDLIBS += -lpthread -lunicorn -lm
+ 
+ ifneq ($(CROSS),)
+-CC = $(CROSS)gcc
++CC = $(CROSS)-gcc
+ endif
+ 
+ ifeq ($(UNICORN_ASAN),yes)

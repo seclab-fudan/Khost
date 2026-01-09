@@ -1,0 +1,52 @@
+mmio_models:
+  passthrough:
+    pc_0800108a_mmio_40013c0c:
+      access_size: 0x4
+      addr: 0x40013c0c
+      init_val: 0x0
+      pc: 0x800108a
+    pc_0800107e_mmio_40013c08:
+      access_size: 0x4
+      addr: 0x40013c08
+      init_val: 0x0
+      pc: 0x800107e
+    pc_08001072_mmio_40013c0c:
+      access_size: 0x4
+      addr: 0x40013c0c
+      init_val: 0x0
+      pc: 0x8001072
+    pc_08001066_mmio_40013c08:
+      access_size: 0x4
+      addr: 0x40013c08
+      init_val: 0x0
+      pc: 0x8001066
+    pc_0800105a_mmio_40013c04:
+      access_size: 0x4
+      addr: 0x40013c04
+      init_val: 0x0
+      pc: 0x800105a
+    pc_0800104e_mmio_40013c00:
+      access_size: 0x4
+      addr: 0x40013c00
+      init_val: 0x0
+      pc: 0x800104e
+firmware: ./simbench.bin
+time_measure_begin: 0x800101c
+time_measure_end: 0x8001020
+memory_map:
+  mmio:
+    base_addr: 0x40000000
+    permissions: rw-
+    size: 0x20000000
+  system:
+    base_addr: 0xe0000000
+    permissions: rw-
+    size: 0x00100000
+  ram:
+    base_addr: 0x20000000
+    permissions: rw-
+    size: 0x20000000
+  flash:
+    base_addr: 0x0
+    permissions: r-x
+    size: 0x20000000

@@ -1,0 +1,1 @@
+ echo 64 | sudo tee /sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages

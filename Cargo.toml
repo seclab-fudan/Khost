@@ -1,0 +1,20 @@
+[package]
+name = "khost-libafl-fuzz"
+version = "0.1.0"
+documentation = ""
+edition = "2018"
+
+[features]
+full_trace = []
+trap = []
+dbg_prints = []
+
+[profile.release]
+incremental = true
+
+[dependencies]
+libafl = { path = "./LibAFL/libafl"}
+clap = "2.33.2"
+
+[build-dependencies]
+cmake = "0.1.31"

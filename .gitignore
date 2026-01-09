@@ -1,0 +1,15 @@
+.vscode
+cscope*
+tags
+/build
+/build-*
+/tests
+autogen*
+AFLWorkspace*
+LibAFLWorkspace*
+*_build
+basic_blocks.json
+test.py
+/target
+capstone
+keystone

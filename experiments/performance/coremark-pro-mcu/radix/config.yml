@@ -1,0 +1,62 @@
+mmio_models:
+  bitextract:
+    pc_08000bbc_mmio_40023840:
+      access_size: 0x4
+      addr: 0x40023840
+      left_shift: 0x18
+      mask: 0x10000000
+      pc: 0x8000bbc
+      size: 0x1
+    pc_08000ba0_mmio_40023844:
+      access_size: 0x4
+      addr: 0x40023844
+      left_shift: 0x8
+      mask: 0x4000
+      pc: 0x8000ba0
+      size: 0x1
+  passthrough:
+    pc_08000bb0_mmio_40023840:
+      access_size: 0x4
+      addr: 0x40023840
+      init_val: 0x0
+      pc: 0x8000bb0
+    pc_08000b94_mmio_40023844:
+      access_size: 0x4
+      addr: 0x40023844
+      init_val: 0x0
+      pc: 0x8000b94
+    pc_080050d6_mmio_40023c00:
+      access_size: 0x4
+      addr: 0x40023c00
+      init_val: 0x0
+      pc: 0x80050d6
+    pc_080050ca_mmio_40023c00:
+      access_size: 0x4
+      addr: 0x40023c00
+      init_val: 0x0
+      pc: 0x80050ca
+    pc_080050be_mmio_40023c00:
+      access_size: 0x4
+      addr: 0x40023c00
+      init_val: 0x0
+      pc: 0x80050be
+firmware: ./coremark-pro.bin
+time_measure_begin: 0x8000f56
+time_measure_end: 0x8000f66
+memory_map:
+  mmio:
+    base_addr: 0x40000000
+    permissions: rw-
+    size: 0x20000000
+  system:
+    base_addr: 0xe0000000
+    permissions: rw-
+    size: 0x00100000
+  ram:
+    base_addr: 0x20000000
+    permissions: rw-
+    size: 0x20000000
+  flash:
+    base_addr: 0x0
+    permissions: r-x
+    size: 0x20000000

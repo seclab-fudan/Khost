@@ -1,0 +1,44 @@
+diff -ruN unicorn-1.0.1-ori/qemu/tcg/aarch64/tcg-target.c unicorn-1.0.1/qemu/tcg/aarch64/tcg-target.c
+--- unicorn-1.0.1-ori/qemu/tcg/aarch64/tcg-target.c	2017-04-20 06:14:24.000000000 +0000
++++ unicorn-1.0.1/qemu/tcg/aarch64/tcg-target.c	2025-06-20 14:48:52.958670989 +0000
+@@ -999,7 +999,10 @@
+     TCGMemOp opc = lb->opc;
+     TCGMemOp size = opc & MO_SIZE;
+ 
+-    reloc_pc19(lb->label_ptr[0], s->code_ptr);
++    // reloc_pc19(lb->label_ptr[0], s->code_ptr);
++    const int type = (HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_WRITE) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ_AFTER)) ?
++                R_AARCH64_JUMP26 : R_AARCH64_CONDBR19;
++    patch_reloc(lb->label_ptr[0], type, (intptr_t)s->code_ptr, 0);
+ 
+     tcg_out_mov(s, TCG_TYPE_I64, TCG_REG_X0, TCG_AREG0);
+     tcg_out_mov(s, TARGET_LONG_BITS == 64, TCG_REG_X1, lb->addrlo_reg);
+@@ -1020,7 +1023,10 @@
+     TCGMemOp opc = lb->opc;
+     TCGMemOp size = opc & MO_SIZE;
+ 
+-    reloc_pc19(lb->label_ptr[0], s->code_ptr);
++    // reloc_pc19(lb->label_ptr[0], s->code_ptr);
++    const int type = (HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_WRITE) || HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ_AFTER)) ?
++                R_AARCH64_JUMP26 : R_AARCH64_CONDBR19;
++    patch_reloc(lb->label_ptr[0], type, (intptr_t)s->code_ptr, 0);
+ 
+     tcg_out_mov(s, TCG_TYPE_I64, TCG_REG_X0, TCG_AREG0);
+     tcg_out_mov(s, TARGET_LONG_BITS == 64, TCG_REG_X1, lb->addrlo_reg);
+@@ -1104,7 +1110,15 @@
+ 
+     /* If not equal, we jump to the slow path. */
+     *label_ptr = s->code_ptr;
+-    tcg_out_goto_cond_noaddr(s, TCG_COND_NE);
++    
++    /* Unicorn: fast path if hookmem is not enable */
++    //tcg_out_goto_cond_noaddr(s, TCG_COND_NE);
++    if (!HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ) && !HOOK_EXISTS(s->uc, UC_HOOK_MEM_WRITE) && !HOOK_EXISTS(s->uc, UC_HOOK_MEM_READ_AFTER)){
++        tcg_out_goto_cond_noaddr(s, TCG_COND_NE);
++    } else {
++      /* If not equal, we jump to the slow path. */
++        tcg_out_goto_noaddr(s);
++    }
+ }
+ 
+ #endif /* CONFIG_SOFTMMU */
