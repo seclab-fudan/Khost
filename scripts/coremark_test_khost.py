@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 import os, multiprocessing, subprocess, re
 
-RUN_COUNT = 1
+RUN_COUNT = 3
 base_path = f"{os.path.dirname(__file__)}/../experiments/performance/coremark-pro-mcu"
 proj_path = f"{os.path.dirname(__file__)}/../"
 
