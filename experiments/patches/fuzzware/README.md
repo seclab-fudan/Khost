@@ -12,7 +12,7 @@
 
 To avoid environment conflicts, please install and run Fuzzware inside a Docker container following the below commands. 
 
-**Create Docker Image:** `./build_docker.sh`
+**Create Image:** `./build_docker.sh`
 
 **Create Container:**  `docker run --privileged=true -it -e LOCAL_USER_ID=`id -u $USER` -v "$PWD":/workspace/fuzzware --name fuzzware fuzzware:latest /bin/bash`
 
@@ -21,6 +21,8 @@ To avoid environment conflicts, please install and run Fuzzware inside a Docker 
 **Start Container:**  `docker start fuzzware`
 
 #### Fuzzing Test Usage
+
+**Copy Tests to Fuzzware's Workspace:** `cp -r   ROOT_DIR_Khost/experiments/patches/fuzzware/tests ./`
 
 **Start Fuzzing with AFL++:**
 
