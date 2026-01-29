@@ -1,6 +1,41 @@
-diff -Naur emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h emulator-modified/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h
---- emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h	2025-05-04 22:20:38.063596715 +0800
-+++ emulator-modified/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h	2025-05-04 22:49:02.187293587 +0800
+diff -rNu '--exclude=.git' fuzzware/Dockerfile fuzzware-modified/Dockerfile
+--- fuzzware/Dockerfile	2026-01-29 11:59:24.489062939 +0800
++++ fuzzware-modified/Dockerfile	2026-01-29 12:21:15.180415932 +0800
+@@ -13,8 +13,8 @@
+     echo "user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
+ 
+ RUN USER=user GROUP=user VERSION=0.5.1 && \
+-    wget https://github.com/boxboat/fixuid/releases/download/v$VERSION/fixuid-$VERSION-linux-amd64.tar.gz && \
+-    tar -C /usr/local/bin -xzf fixuid-$VERSION-linux-amd64.tar.gz && \
++    wget https://github.com/boxboat/fixuid/releases/download/v$VERSION/fixuid-$VERSION-linux-arm64.tar.gz && \
++    tar -C /usr/local/bin -xzf fixuid-$VERSION-linux-arm64.tar.gz && \
+     chown root:root /usr/local/bin/fixuid && \
+     chmod 4755 /usr/local/bin/fixuid && \
+     mkdir -p /etc/fixuid && \
+@@ -48,8 +48,8 @@
+ WORKDIR $FUZZWARE/emulator
+ USER user
+ RUN ./get_afl.sh && \
+-    UNICORN_QEMU_FLAGS="--python=/usr/bin/python3" make -C $FUZZWARE/emulator/afl clean all && \
+-    make -C $FUZZWARE/emulator/AFLplusplus clean all && \
++    UNICORN_QEMU_FLAGS="--python=/usr/bin/python3" AFL_NO_X86=1 make -C $FUZZWARE/emulator/afl clean all && \
++    AFL_NO_X86=1 make -C $FUZZWARE/emulator/AFLplusplus clean all && \
+     cd $FUZZWARE/emulator/unicorn && \
+     ./build_unicorn.sh
+ 
+diff -rNu '--exclude=.git' fuzzware/emulator/get_afl.sh fuzzware-modified/emulator/get_afl.sh
+--- fuzzware/emulator/get_afl.sh	2026-01-29 11:59:16.449195633 +0800
++++ fuzzware-modified/emulator/get_afl.sh	2026-01-29 11:47:41.156257849 +0800
+@@ -36,5 +36,5 @@
+ 
+ if [ ! -e AFLplusplus ]; then
+     git clone https://github.com/AFLplusplus/AFLplusplus
+-    git -C AFLplusplus checkout 3.14c
++    git -C AFLplusplus checkout b89727bea903aec80
+ fi
+diff -rNu '--exclude=.git' fuzzware/emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h fuzzware-modified/emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h
+--- fuzzware/emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h	2026-01-29 11:59:16.457195500 +0800
++++ fuzzware-modified/emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_cm3.h	2026-01-29 11:47:05.108286642 +0800
 @@ -87,7 +87,7 @@
  
  #elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -10,9 +45,9 @@ diff -Naur emulator/harness/fuzzware_harness/native/core_peripherals/cmsis/core_
    #endif
  
  #elif defined ( __GNUC__ )
-diff -Naur emulator/harness/fuzzware_harness/native/Makefile emulator-modified/harness/fuzzware_harness/native/Makefile
---- emulator/harness/fuzzware_harness/native/Makefile	2025-05-04 22:20:38.062596707 +0800
-+++ emulator-modified/harness/fuzzware_harness/native/Makefile	2025-05-04 22:39:09.364214258 +0800
+diff -rNu '--exclude=.git' fuzzware/emulator/harness/fuzzware_harness/native/Makefile fuzzware-modified/emulator/harness/fuzzware_harness/native/Makefile
+--- fuzzware/emulator/harness/fuzzware_harness/native/Makefile	2026-01-29 11:59:16.453195567 +0800
++++ fuzzware-modified/emulator/harness/fuzzware_harness/native/Makefile	2026-01-29 11:47:05.112286639 +0800
 @@ -6,7 +6,8 @@
  BIN_EXT = .so
  
@@ -23,9 +58,9 @@ diff -Naur emulator/harness/fuzzware_harness/native/Makefile emulator-modified/h
  LDFLAGS += -shared -L$(LIBDIR) -lunicorn
  
  .PHONY: all clean
-diff -Naur emulator/unicorn/fuzzware-unicorn/Makefile emulator-modified/unicorn/fuzzware-unicorn/Makefile
---- emulator/unicorn/fuzzware-unicorn/Makefile	2025-05-04 22:21:39.895144130 +0800
-+++ emulator-modified/unicorn/fuzzware-unicorn/Makefile	2025-05-04 22:51:24.246515678 +0800
+diff -rNu '--exclude=.git' fuzzware/emulator/unicorn/fuzzware-unicorn/Makefile fuzzware-modified/emulator/unicorn/fuzzware-unicorn/Makefile
+--- fuzzware/emulator/unicorn/fuzzware-unicorn/Makefile	2026-01-29 11:59:23.701075884 +0800
++++ fuzzware-modified/emulator/unicorn/fuzzware-unicorn/Makefile	2026-01-29 11:47:05.136286620 +0800
 @@ -143,8 +143,10 @@
  ifeq ($(UNICORN_DEBUG),yes)
  CFLAGS += -g
@@ -39,9 +74,9 @@ diff -Naur emulator/unicorn/fuzzware-unicorn/Makefile emulator-modified/unicorn/
  UNICORN_QEMU_FLAGS += --disable-debug-info
  endif
  
-diff -Naur emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c emulator-modified/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c
---- emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c	2025-05-04 22:21:40.004145094 +0800
-+++ emulator-modified/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c	2025-05-04 22:54:08.578930644 +0800
+diff -rNu '--exclude=.git' fuzzware/emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c fuzzware-modified/emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c
+--- fuzzware/emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c	2026-01-29 11:59:24.025070558 +0800
++++ fuzzware-modified/emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c	2026-01-29 11:47:05.168286596 +0800
 @@ -999,7 +999,11 @@
      TCGMemOp opc = lb->opc;
      TCGMemOp size = opc & MO_SIZE;
@@ -84,9 +119,9 @@ diff -Naur emulator/unicorn/fuzzware-unicorn/qemu/tcg/aarch64/tcg-target.c emula
  }
  
  #endif /* CONFIG_SOFTMMU */
-diff -Naur emulator/unicorn/fuzzware-unicorn/samples/Makefile emulator-modified/unicorn/fuzzware-unicorn/samples/Makefile
---- emulator/unicorn/fuzzware-unicorn/samples/Makefile	2025-05-04 22:21:40.013145174 +0800
-+++ emulator-modified/unicorn/fuzzware-unicorn/samples/Makefile	2025-05-04 22:54:51.240298151 +0800
+diff -rNu '--exclude=.git' fuzzware/emulator/unicorn/fuzzware-unicorn/samples/Makefile fuzzware-modified/emulator/unicorn/fuzzware-unicorn/samples/Makefile
+--- fuzzware/emulator/unicorn/fuzzware-unicorn/samples/Makefile	2026-01-29 11:59:24.049070164 +0800
++++ fuzzware-modified/emulator/unicorn/fuzzware-unicorn/samples/Makefile	2026-01-29 11:47:05.184286583 +0800
 @@ -23,7 +23,7 @@
  LDLIBS += -lpthread -lunicorn -lm
  
@@ -96,3 +131,11 @@ diff -Naur emulator/unicorn/fuzzware-unicorn/samples/Makefile emulator-modified/
  endif
  
  ifeq ($(UNICORN_ASAN),yes)
+diff -rNu '--exclude=.git' fuzzware/modeling/requirements.txt fuzzware-modified/modeling/requirements.txt
+--- fuzzware/modeling/requirements.txt	2026-01-29 11:59:11.937270692 +0800
++++ fuzzware-modified/modeling/requirements.txt	2026-01-29 11:55:43.117286865 +0800
+@@ -5,3 +5,4 @@
+ capstone==5.0.3
+ angr==9.2.61
+ IPython
++pycparser==2.22

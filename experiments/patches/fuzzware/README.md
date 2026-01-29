@@ -6,16 +6,15 @@
 
 #### Apply the patches to add ARM64 support
 
-`cp ROOT_DIR_Khost/experiments/patches/fuzzware/fuzzware.diff ./ && cd emulator && patch -p1 < ../fuzzware.diff && cd ../`
+`cp ROOT_DIR_Khost/experiments/patches/fuzzware/fuzzware.diff ./ && patch -p1 < fuzzware.diff`
 
-#### Update AFL++  Version (v4.3)
+#### Build      
 
-`cp ROOT_DIR_Khost/experiments/patches/fuzzware/get_afl.sh emulator`
+To avoid environment conflicts, please install and run Fuzzware inside a Docker container. More details can be found in its [README.md](https://github.com/fuzzware-fuzzer/fuzzware/blob/main/README.md). 
 
-#### Build       
+`./build_docker.sh`
 
-Build Fuzzware according to the instructions in its [README.md](https://github.com/fuzzware-fuzzer/fuzzware/blob/main/README.md). To avoid environment conflicts, please install and run Fuzzware inside a Docker container. 
+Then, you can create a container based on fuzzware image (fuzzware:latest), then, enter the conrainer and start fuzzing with AFL++ (--aflpp).
 
-#### About AFL++ Mode
+`fuzzware pipeline --skip-afl-cpufreq --aflpp DIR_TO_FIRMWARE`
 
-For details on how to use the AFL++ mode, please refer to the corresponding [issue](https://github.com/fuzzware-fuzzer/fuzzware/issues/29).
