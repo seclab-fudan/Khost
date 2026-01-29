@@ -8,13 +8,24 @@
 
 `cp ROOT_DIR_Khost/experiments/patches/fuzzware/fuzzware.diff ./ && patch -p1 < fuzzware.diff`
 
-#### Build      
+#### Build Docker for Fuzzware
 
-To avoid environment conflicts, please install and run Fuzzware inside a Docker container. More details can be found in its [README.md](https://github.com/fuzzware-fuzzer/fuzzware/blob/main/README.md). 
+To avoid environment conflicts, please install and run Fuzzware inside a Docker container following the below commands. 
 
-`./build_docker.sh`
+**Create Docker Image:** `./build_docker.sh`
 
-Then, you can create a container based on fuzzware image (fuzzware:latest), then, enter the conrainer and start fuzzing with AFL++ (--aflpp).
+**Create Container:**  `docker run --privileged=true -it -e LOCAL_USER_ID=`id -u $USER` -v "$PWD":/workspace/fuzzware --name fuzzware fuzzware:latest /bin/bash`
 
-`fuzzware pipeline --skip-afl-cpufreq --aflpp DIR_TO_FIRMWARE`
+**Exit Container:**  `exit`
 
+**Start Container:**  `docker start fuzzware`
+
+#### Fuzzing Test Usage
+
+**Start Fuzzing with AFL++:**
+
+`docker exec -it -u root fuzzware fuzzware pipeline --skip-afl-cpufreq --aflpp --base-inputs /workspace/fuzzware/tests/01_PLC/corpus /workspace/fuzzware/tests/01_PLC/`
+
+#### Note:
+
+More details can be found in its [README.md](https://github.com/fuzzware-fuzzer/fuzzware/blob/main/README.md).
