@@ -1,0 +1,24 @@
+include:
+  - ./../../configs/hw/cortexm_memory.yml
+  - ./../../configs/hals/stm32f4_hal.yml
+  - ./../../configs/hals/arduino.yml
+  - ./PLC_addrs.yml
+
+use_nvic: True
+use_timers: True
+
+memory_map:
+  ivt: {base_addr: 0x0, file: ./PLC.bin,
+    permissions: r-x, size: 0x800000}
+  rom: {base_addr: 0x08000000, file: ./PLC.bin,
+    permissions: r-x, size: 0x800000}
+
+# serial_irq: 0x35
+
+packet_serial: True
+use_timers: True
+use_nvic: True
+handlers:
+  _Error_Handler:
+    handler: hal_fuzz.handlers.generic.crash
+

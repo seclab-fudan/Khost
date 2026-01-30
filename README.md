@@ -36,6 +36,7 @@ Khost is developed and evaluated on **Ubuntu 22.04**, running on either a **Rasp
 Khost is memory-intensive, so **8 GB** of RAM is recommended. If your hardware has less memory, you must configure **swap space** to prevent the program from being terminated by the Linux **Out-Of-Memory (OOM) killer**. You can refer to the following commands to complete this.
 
 ```
+sudo swapoff /swapfile
 sudo fallocate -l 8G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
@@ -44,7 +45,7 @@ sudo swapon /swapfile
 
 ### KVM Permissions
 
-Access to `/dev/kvm` is restricted to users in the kvm group. If you encounter the error `Permission denied accessing /dev/kvm`, add your user to the kvm group using `sudo usermod -aG kvm $USER`. To take effect, you must **fully log out** and log back in after running this command. You can verify the change using `groups | grep kvm`.
+Access to `/dev/kvm` is restricted to users in the kvm group. If you encounter the error `Permission denied accessing /dev/kvm`, add your user to the kvm group using `sudo usermod -aG kvm $USER`. To take effect, you must **fully log out** and log back in after running this command. You can verify the change using `groups | grep kvm`. **Alternatively**, if the system is accessed by logging in as the root user, the above KVM permission configuration steps are not required.
 
 If `/dev/kvm` is still inaccessible after re-login, ensure that your kernel has KVM support enabled.
 

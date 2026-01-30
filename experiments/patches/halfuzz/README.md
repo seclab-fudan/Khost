@@ -6,18 +6,30 @@
 
 #### Apply the patches to add ARM64 support
 
-`cp ROOT_DIR_Khost/experiments/patches/hal-fuzz/halfuzz.diff ./unicorn-mode/patches && cp ROOT_DIR_Khost/experiments/patches/hal-fuzz/build_unicorn_support.sh  unicorn-mode`
+`cp ROOT_DIR_Khost/experiments/patches/hal-fuzz/halfuzz.diff ./ && patch -p1 <halfuzz.diff`
 
-#### Update AFL++  Version (v4.3)
+#### Build Docker for HALucinator
 
-`git clone https://github.com/AFLplusplus/AFLplusplus && git -C AFLplusplus checkout b89727bea903aec80`
+To avoid environment conflicts, please install and run HALucinator inside a Docker container following the below commands.
 
-#### Build       
+**Create Image:** `docker build -t halfuzz:latest .`
 
-Build hal-fuzz according to the instructions in its [README.md](https://github.com/ucsb-seclab/hal-fuzz/blob/master/README.md). To avoid environment conflicts, we recommend installing and running hal-fuzz inside a Docker container.
+**Create Container:**  `docker run --privileged=true -it -e LOCAL_USER_ID=id -u $USER -v "$PWD":/workspace/halfuzz --name halfuzz halfuzz:latest /bin/bash`
 
-#### Use AFL++ Backe
+**Exit Container:**  `exit`
 
-To enable afl++ backend, please to replace the `FUZZ=$WORKDIR/afl-fuzz` as `FUZZ=$WORKDIR_AFLplusplus/afl-fuzz`
+**Start Container:**  `docker start halfuzz`
+
+#### Fuzzing Test Usage
+
+**Copy Tests to Fuzzware's Workspace:** `cp -r   ROOT_DIR_Khost/experiments/patches/halfuzz/fuzz++ ./`
+
+**Start Fuzzing with AFL++:**
+
+`docker exec -it -uroot halfuzz /workspace/halfuzz/fuzz++/01_PLC/fuzz_start.sh`
+
+#### Note:
+
+More details can be found in its [README.md](https://github.com/ucsb-seclab/hal-fuzz/blob/master/README.md) .
 
 

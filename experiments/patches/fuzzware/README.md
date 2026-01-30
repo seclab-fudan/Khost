@@ -10,11 +10,11 @@
 
 #### Build Docker for Fuzzware
 
-To avoid environment conflicts, please install and run Fuzzware inside a Docker container following the below commands. 
+To avoid environment conflicts, please install and run Fuzzware inside a Docker container following the below commands.
 
 **Create Image:** `./build_docker.sh`
 
-**Create Container:**  `docker run --privileged=true -it -e LOCAL_USER_ID=`id -u $USER` -v "$PWD":/workspace/fuzzware --name fuzzware fuzzware:latest /bin/bash`
+**Create Container:**  `docker run --privileged=true -it -e LOCAL_USER_ID=id -u $USER -v "$PWD":/workspace/fuzzware --name fuzzware fuzzware:latest /bin/bash`
 
 **Exit Container:**  `exit`
 
