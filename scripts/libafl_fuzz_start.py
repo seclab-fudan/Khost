@@ -40,7 +40,7 @@ def get_free_cpu():
         for line in res.stdout.splitlines():
             if len(line) != 0:
                 cpu_lists.append(int(line))
-        for i in range(0, 64):
+        for i in range(1, 64):
             if i not in cpu_lists:
                 return i
 
