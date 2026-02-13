@@ -793,6 +793,9 @@ inline static void force_clear_cache(uintptr_t start, uintptr_t end) {
 /// @brief update the fuzzware model
 /// @return true on succ, false on fail
 bool BoardFull::update_fuzzware_model() {
+	if (!CONFIG.option_auto_model()) {
+		return false;
+	}
     // create uuid for statefile name 
     std::random_device rand_dev;
     std::mt19937_64 rand_gen(rand_dev());
