@@ -43,6 +43,13 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
+##### Mitigation Strategy
+
+To mitigate memory pressure, you may adopt the `lazy` strategy to build the memory map. Although this approach may introduce some additional overhead due to postponed allocation, it represents an acceptable trade-off between performance and resource efficiency. This can be achieved through the following modifications:
+
+1. Remove `MAP_POPULATE` from `Board::init_memory_backends` function in `src/engine/en_board.cpp` file; 
+2. Remove `MAP_POPULATE` ,`memset(_on_chip_device_backend, 0, ON_CHIP_DEV_SIZE)` and `memset(_off_chip_device_backend, 0, VEN_SYS_DEV_END - S_DEV_START + 1)` from `BoardFull::init_memory_backends` function in  `src/engine/en_board_full.cpp` file; 
+
 ### KVM Permissions
 
 Access to `/dev/kvm` is restricted to users in the kvm group. If you encounter the error `Permission denied accessing /dev/kvm`, add your user to the kvm group using `sudo usermod -aG kvm $USER`. To take effect, you must **fully log out** and log back in after running this command. You can verify the change using `groups | grep kvm`. **Alternatively**, if the system is accessed by logging in as the root user, the above KVM permission configuration steps are not required.
@@ -53,20 +60,20 @@ If `/dev/kvm` is still inaccessible after re-login, ensure that your kernel has 
 
 Due to a bug in the Linux kernel that prevents vCPU restoration in AArch32 system mode, the kernel must be updated to version 5.15.0.1070 or later to incorporate the corresponding fix. More details can be found in the following upstream KVM patch: https://patchwork.kernel.org/project/kvm/patch/20240524141956.1450304-3-maz@kernel.org/
 
-On Raspberry Pi 4B, you can either run `apt install linux-image-raspi=5.15.0.1092.90 && reboot`, or download the kernel from [linux-kernel-for raspberry](https://launchpad.net/ubuntu/+source/linux-raspi/5.15.0-1070.73) and update manually.
+On Raspberry Pi 4B, you can either run `sudo apt install -y linux-image-raspi && sudo reboot`, or download the kernel from [linux-kernel-for raspberry](https://launchpad.net/ubuntu/+source/linux-raspi/5.15.0-1070.73) and update manually.
 
 ### Package Dependencies
 
 Please install the packages that Khost requires according to the following terminal.
 
-`apt install curl vim cmake make bc git gcc g++ llvm-dev gcc-arm-none-eabi libyaml-cpp-dev pip tmux ninja-build meson libglib2.0-dev python3-virtualenv python3-virtualenvwrapper `
+`sudo apt install curl vim cmake make bc git gcc g++ llvm-dev gcc-arm-none-eabi libyaml-cpp-dev tmux ninja-build meson libglib2.0-dev python3-pip python3-virtualenv python3-virtualenvwrapper `
 
-Keystone: `git clone https://github.com/keystone-engine/keystone.git && cd keystone && git checkout fb92f32391c6cced8 && mkdir build && cd build && ../make-share.sh && make install && ldconfig && cd ../../`
+Keystone: `git clone https://github.com/keystone-engine/keystone.git && cd keystone && git checkout fb92f32391c6cced8 && mkdir build && cd build && ../make-share.sh && sudo make install && sudo ldconfig && cd ../../`
 
-Capstone: `git clone https://github.com/capstone-engine/capstone.git && cd capstone && git checkout 106f7d3b949f5dd8e6c && ./cmake.sh && make -j && make install && ldconfig && cd ../`
+Capstone: `git clone https://github.com/capstone-engine/capstone.git && cd capstone && git checkout 106f7d3b949f5dd8e6c && ./cmake.sh && sudo make -j && sudo make install && sudo ldconfig && cd ../`
 
 <a id="modeling-module"></a>
-Modeling Module: `pip3 install -r experiments/patches/fuzzware/requirements-modeling.txt && git clone --recursive https://github.com/fuzzware-fuzzer/fuzzware.git && cd fuzzware && git checkout 28ce2dc3f888ec && cd modeling && python3 setup.py install && cd ../../`
+Modeling Module: `sudo pip3 install -r experiments/patches/fuzzware/requirements-modeling.txt && git clone --recursive https://github.com/fuzzware-fuzzer/fuzzware.git && cd fuzzware && git checkout 28ce2dc3f888ec && cd modeling && sudo python3 setup.py install && cd ../../`
 
 ## Compile and Verify
 
@@ -225,13 +232,13 @@ Config core_pattern: `echo core | sudo tee /proc/sys/kernel/core_pattern`
 
 Configure the CPU mode (skip this step if it is not supported on your system): `cd /sys/devices/system/cpu && echo performance | sudo tee cpu*/cpufreq/scaling_governor &&  cd -`
 
-Start Fuzzing: `./scripts/fuzz_start.py item_of_firmware/all`
+Start Fuzzing (Usage): `./scripts/fuzz_start.py firmware_id/all`
 
-Fuzz one case: `./scripts/fuzz_start.py 01_PLC`. More firmware items are available under `experiments/fuzz`.
+Fuzz one case: `./scripts/fuzz_start.py 01_PLC`. More firmware ids are available under `experiments/fuzz`.
 
-Fuzz all cases (to ensure that your hardware has enough cores): `./scripts/fuzz_start.py all`
+Fuzz all cases (to ensure that your hardware has enough cores and memory): `./scripts/fuzz_start.py all`
 
-Coverage: `./scripts/fuzz_replay.py item_of_firmware`
+Coverage: `./scripts/fuzz_replay.py firmware_id`
 
 Replay & Debug: `./build/runner/khost-debug config_to_firmware input_file`
 
@@ -239,7 +246,7 @@ Count overhead from coverage collection: `./scripts/count_overhead_cov.py`
 
 More usages, please use:  `./build/runner/khost-debug -h`
 
-Crash cases are saved in `experiments/fuzz/item_of_firmware/crashes/`
+Crash cases are saved in `experiments/fuzz/firmware_id/crashes/`
 
 To replay a crash, use `khost-debug`, which displays detailed information for a specific crash case. Khost provides three levels of debug modes, which can be selected using the `-l <level>` option:
 
@@ -254,7 +261,7 @@ Example output:
 
 ```
 INFO  | khost: set output level to error debug    (debug level)
-INFO  | khost: enable output for all modules	  (enable debug for all rehosting modules)
+INFO  | khost: enable output for all modules      (enable debug for all rehosting modules)
 INFO  | khost: load config from experiments/fuzz/01_PLC/config.yml
 INFO  | khost: load single input form experiments/fuzz/01_PLC/crashes/id:000074,sig:00,src:000414,time:9648045,execs:5625492,op:havoc,rep:13
 INFO  | loader: firmware path: experiments/fuzz/01_PLC/./PLC.bin
@@ -295,12 +302,12 @@ GUEST | [guest-systick] set next irq to 0x000001F4
 DEBUG | host-cpu: kvm enter, pc=0xf00041c0
 DEBUG | host-cpu: kvm exit, pc=0xf00041bc
 GUEST | [guest-systick] handle systick
-GUEST | [guest-handler] MMIODataAbort: DFSR = 0x00000019, DFAR = 0x40023800, PC = 0x07FDBFB0, SP = 0x20030000, XPSR = 0x6000003F				(MMIO interactions)
+GUEST | [guest-handler] MMIODataAbort: DFSR = 0x00000019, DFAR = 0x40023800, PC = 0x07FDBFB0, SP = 0x20030000, XPSR = 0x6000003F                                (MMIO interactions)
 DEBUG | host-cpu: kvm enter, pc=0xf00041c0
 DEBUG | host-cpu: kvm exit, pc=0xf00041bc
 .....
 
-ERROR | host-cpu: Data Abort							(crash info. and vCPU's state)
+ERROR | host-cpu: Data Abort                                                    (crash info. and vCPU's state)
 ERROR | host-cpu: ====================== PC @ 0x0800090a ======================
 ERROR | host-cpu: ARMv7-M Core Registers:
 ERROR | host-cpu:    R0=0x00000000   R1=0x00000f72   R2=0x00000002
@@ -346,7 +353,7 @@ Frimware Context: task_id=0 excp_id=0
    R6=0x20202020   R7=0x00000000   R8=0x00000000
    R9=0x00000000  R10=0x00000000  R11=0x00000000
   R12=0x00000004   SP=0x2002ffc0   LR=0x00002020
-Stack Trace:									(The call stack at the time of the crash)
+Stack Trace:                                                                    (The call stack at the time of the crash)
   [01] 0x0800090a: _ZN6Modbus11process_FC1EPth(+0x48)
   [02] 0x08000bd4: jpt_8000BBA(+0x16)
   [03] 0x08000c48: loop(+0x8)
@@ -357,8 +364,8 @@ Stack Trace:									(The call stack at the time of the crash)
 
 #### With LibAFL Backend
 
-Install cargo: `apt install iproute2 cargo`
-Install rustup: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+Install cargo: `sudo apt install iproute2 cargo`
+Install rustup: `sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 
 Update cargo configuration to support ARMv7 by adding the following code to `~/.cargo/config`:
 
@@ -369,15 +376,15 @@ linker = "arm-linux-gnueabihf-gcc"
 
 Compile: `cargo clean && cargo build --release `
 
-Start Fuzzing: `./scripts/libafl_fuzz_start.py item_of_firmware/all`
+Start Fuzzing (Usage): `./scripts/libafl_fuzz_start.py firmware_id/all`
 
 Fuzz one case:  `./scripts/libafl_fuzz_start.py 01_PLC`
 
-Fuzz all cases (to sure that your hardware has enough cores):  `./scripts/libafl_fuzz_start.py all`
+Fuzz all cases (to ensure that your hardware has enough cores and memory):  `./scripts/libafl_fuzz_start.py all`
 
 **Note:** In the LibAFL version, the backend may continue running even after the program is forcefully terminated. Therefore, before starting a new round on the Raspberry Pi, please ensure that any running khost-libafl-fuzz backend processes are terminated.
 
-Count Coverage: `./scripts/libafl_fuzz_replay.py item_of_firmware`
+Count Coverage: `./scripts/libafl_fuzz_replay.py firmware_id`
 
 ## Add New Firmware
 

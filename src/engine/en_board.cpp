@@ -87,6 +87,7 @@ bool Board::cancel_memory_region(int slot) {
 /// @brief init memory backend for the virtual machine
 /// @return true on success, false on fail
 bool Board::init_memory_backends() {
+    // uint32_t simple_attr = MAP_SHARED | MAP_ANONYMOUS;// | MAP_POPULATE;  // use lazy strategy
     uint32_t simple_attr = MAP_SHARED | MAP_ANONYMOUS | MAP_POPULATE;
     uint32_t hugepage_attr = simple_attr | MAP_HUGETLB | MAP_HUGE_1GB;
 

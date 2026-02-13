@@ -36,6 +36,7 @@ bool BoardFull::init_memory_backends() {
     if (!Board::init_memory_backends()) {
         return false;
     }
+    // uint32_t simple_attr = MAP_SHARED | MAP_ANONYMOUS;// | MAP_POPULATE; // use lazy strategy
     uint32_t simple_attr = MAP_SHARED | MAP_ANONYMOUS | MAP_POPULATE;
 
 #ifndef DISABLE_APT
@@ -47,6 +48,7 @@ bool BoardFull::init_memory_backends() {
         _on_chip_device_backend = nullptr;
         return false;
     }
+    // memset(_on_chip_device_backend, 0, ON_CHIP_DEV_SIZE); // use lazy strategy
     memset(_on_chip_device_backend, 0, ON_CHIP_DEV_SIZE);
 
     _off_chip_device_backend = mmap(
@@ -58,6 +60,7 @@ bool BoardFull::init_memory_backends() {
         _off_chip_device_backend = nullptr;
         return false;
     }
+    // memset(_off_chip_device_backend, 0, VEN_SYS_DEV_END - S_DEV_START + 1);  // use lazy strategy
     memset(_off_chip_device_backend, 0, VEN_SYS_DEV_END - S_DEV_START + 1);
     
     if (!submit_memory_region(
