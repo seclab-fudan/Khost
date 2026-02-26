@@ -80,6 +80,7 @@ int init_execution(const char *config_path, const char *working_dir) {
     khost::Config::instance().option_set_output_target(RT_OUTPUT_SYSTICK, false);
     khost::Config::instance().option_set_output_target(RT_OUTPUT_TRIGGER, false);
     khost::Config::instance().option_set_use_hugepage(false);
+	// khost::Config::instance().option_set_auto_model(true);
 
     board = new khost::BoardFull();
     if (board == nullptr) {
