@@ -145,7 +145,9 @@ def main():
 
     if not os.path.exists(FUZZER_PATH):
         print("fuzzer not found, try to compile fuzzer")
-        if os.system(f"{FILE_PATH}/../build.sh") != 0:
+        os.chdir(f"{FILE_PATH}/../")
+        # if os.system("cargo clean && cargo build --release -Z http-registry") != 0:
+        if os.system("cargo clean && cargo build --release") != 0:
             print("failed to compile fuzzer")
             exit(1)
 
