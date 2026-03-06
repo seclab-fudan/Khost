@@ -181,6 +181,18 @@ target_include_directories(engine-debug PUBLIC
 
 target_link_libraries(engine stdc++ keystone capstone yaml-cpp)
 target_compile_definitions(engine PRIVATE KVM_OPEN_DEBUG=0)
+# support static version
+# find_library(KEYSTONE_LIB NAMES libkeystone.a)
+# find_library(CAPSTONE_LIB NAMES libcapstone.a)
+# find_library(YAML_CPP_LIB NAMES libyaml-cpp.a)
+# 
+# target_link_libraries(engine PRIVATE
+#     ${KEYSTONE_LIB}
+#     ${CAPSTONE_LIB}
+#     ${YAML_CPP_LIB}
+#     -static-libstdc++
+#     -static-libgcc
+# )
 target_link_libraries(engine-debug stdc++ keystone capstone yaml-cpp)
 target_compile_definitions(engine-debug PRIVATE KVM_OPEN_DEBUG=1)
 

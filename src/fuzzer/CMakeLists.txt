@@ -132,6 +132,14 @@ add_executable(khost-afl-fuzz
 # )
 set(COMM_LIBS dl rt m engine)
 target_link_libraries(khost-afl-fuzz ${COMM_LIBS})
+
+# static link for creating prebuilt version
+# target_link_options(khost-afl-fuzz PRIVATE
+#     -static-libstdc++
+#     -static-libgcc
+# 	-static
+# )
+
 # target_link_libraries(khost-afl-showmap ${COMM_LIBS})
 # target_link_libraries(khost-afl-tmin ${COMM_LIBS})
 # target_link_libraries(khost-afl-analyze ${COMM_LIBS})

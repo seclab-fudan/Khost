@@ -28,3 +28,15 @@ target_link_libraries(khost PRIVATE engine)
 target_compile_definitions(khost PRIVATE KVM_OPEN_DEBUG=0)
 target_link_libraries(khost-debug PRIVATE engine-debug)
 target_compile_definitions(khost-debug PRIVATE KVM_OPEN_DEBUG=1)
+
+# static link for creating prebuilt version
+# target_link_options(khost PRIVATE
+#     -static-libstdc++
+#     -static-libgcc
+# 	-static
+# )
+# target_link_options(khost-debug PRIVATE
+#     -static-libstdc++
+#     -static-libgcc
+# 	-static
+# )
