@@ -448,8 +448,8 @@ Khost uses **Fuzzware's Modeling Module** to generate MMIO models. Before runnin
 
 ## Run Fuzzware on ARM64
 
-Please refer to `experiments/patches/fuzzware/README.md`
+Please refer to [experiments/patches/fuzzware/README.md](./blob/master/experiments/patches/fuzzware/README.md)
 
 ## Run HALucinator on ARM64
 
-Please refer to `experiments/patches/halfuzz/README.md`
+Please refer to [experiments/patches/halfuzz/README.md](./blob/master/experiments/patches/halfuzz/README.md)
